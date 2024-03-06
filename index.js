@@ -1,4 +1,3 @@
-// Call all library
 const cors = require('cors')
 const express = require('express')
 const mongoose = require('mongoose')
@@ -38,9 +37,10 @@ const checkToken = require('./middlewares/verifyToken')
 // Routers
 const accountRouter = require('./Routers/authRouter')
 const VisualRouter = require('./Routers/visualRouter')
+const VerifyToken = require('./Middlewares/verifyToken')
 
 app.use('/account', accountRouter)
-app.use('/visual', checkToken, VisualRouter)
+app.use('/visual', VerifyToken, VisualRouter)
 
 app.get('/test', (req, res) => {
     res.send('test success!')   

@@ -28,7 +28,7 @@ const signin = async (req, res) => {
         const isMatch = bcrypt.compare(password, existUser.password)
         if(!isMatch) return res.json({ status: 401, message: 'Kata sandi salah!' })
 
-        const token = jsonwebtoken.sign({ user_id: existUser.email }, 'geospasial', { expiresIn: '5h' })
+        const token = jsonwebtoken.sign({ user_id: existUser.email }, 'visual', { expiresIn: '5h' })
 
         return res.json({ status: 200, message: 'Berhasil masuk!', token, data: existUser })
 
