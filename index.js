@@ -32,12 +32,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Middleware
-const checkToken = require('./middlewares/verifyToken')
+const VerifyToken = require('./Middlewares/verifyToken')
 
 // Routers
 const accountRouter = require('./Routers/authRouter')
 const VisualRouter = require('./Routers/visualRouter')
-const VerifyToken = require('./Middlewares/verifyToken')
 
 app.use('/account', accountRouter)
 app.use('/visual', VerifyToken, VisualRouter)
