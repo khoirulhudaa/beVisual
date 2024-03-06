@@ -5,7 +5,7 @@ const app = express()
 const dotenv = require('dotenv')
 dotenv.config();
 
-// 3 on use start (cors, express.json(), bodyParser.urlencoded)
+// 3 on use start (cors, express.json(), express.urlencoded)
 app.use(cors())
 
 // Get variable environment
