@@ -26,7 +26,7 @@ const createVisual = async (req, res) => {
         const { title, description } = req.body
 
         const existVisual = await visualModel.findOne({ title })
-        if (!existVisual) {
+        if (existVisual) {
             return res.status(404).json({ status: 404, message: 'User tidak ditemukan!' })
         }
 
@@ -38,6 +38,7 @@ const createVisual = async (req, res) => {
 
         const newData = {
             title,
+            uploader,
             description,
             image: result.secure_url
         }
