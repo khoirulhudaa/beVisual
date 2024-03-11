@@ -53,7 +53,7 @@ const signup = async (req, res) => {
             user_id: tokenRandom,
             email,
             username,
-            role: 'sub-admin',
+            role: 'super-sub-admin',
             password: passwordHashGenerate,
         })
 
