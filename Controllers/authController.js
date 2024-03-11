@@ -53,6 +53,7 @@ const signup = async (req, res) => {
             user_id: tokenRandom,
             email,
             username,
+            role: 'sub-admin',
             password: passwordHashGenerate,
         })
 
@@ -67,7 +68,7 @@ const signup = async (req, res) => {
 const removeUser = async (req, res) => {
     try {
         
-        const { user_id } = req.body
+        const { user_id } = req.params
 
         const existUser = await authModel.findOneAndDelete({ user_id })
         if(!existUser) return res.json({ status: 404, message: 'Anggota tidak ditemukan!' })
@@ -84,13 +85,22 @@ const updateUser = async (req, res) => {
 
         const { user_id, username, email } = req.body
         
-        const equalUser = await authModel.findOne({ visual_id })
-        if(!equalUser) return res.json({ status: 404, message: 'User not available!' })
+        const equalUser = await authModel.findOne({ user_id })
+        if(!equalUser) return res.json({ status: 404, message: 'Anggota tidak ditemukan!' })
 
-        const filter = { filter }
+        let passwordHashGenerate
+
+        if(req.body.password) {
+            const salt = await bcrypt.genSalt(10)
+            passwordHashGenerate = await bcrypt.hash(req.body.password, salt)
+        }
+
+        const filter = { user_id }
+
         const set = {
             username, 
-            email
+            email,
+            ...(req.body.password ? { password: passwordHashGenerate } : {})
         }
 
         const updateUser = await authModel.updateOne(filter, set, { new: true })

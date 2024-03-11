@@ -17,6 +17,10 @@ const VisualModel = new mongoose.Schema({
         type: String,
         required: true
     },
+    link: {
+        type: String,
+        require: true
+    },
     image: {
         type: String,
         required: true

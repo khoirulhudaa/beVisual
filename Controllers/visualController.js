@@ -23,7 +23,10 @@ const getAllVisual = async (req, res) => {
 
 const createVisual = async (req, res) => {
     try {
-        const { title, description } = req.body
+        const { title, description, uploader, link } = req.body
+
+        console.log(req.body)
+        console.log(req.file)
 
         const existVisual = await visualModel.findOne({ title })
         if (existVisual) {
@@ -34,19 +37,46 @@ const createVisual = async (req, res) => {
             return res.status(404).json({ status: 404, message: 'Gambar belum di upload!' })
         }
 
-        const result = await cloudinary.uploader.upload(req.file.path);
+        let logoNameCloud = null
+        let logo = null 
+
+        if (req.file) {
+            const originalName = req.file.originalname;
+            const randomChars = crypto.randomBytes(4).toString('hex');
+            logoNameCloud = `${randomChars}_${originalName}`;
+         
+            // Menggunakan Promise untuk menunggu selesainya upload ke Cloudinary
+            await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream({ public_id: logoNameCloud }, (error, result) => {
+                    if (error) {
+                        console.error('Cloudinary upload error:', error);
+                        reject(error);
+                    } else {
+                        console.log('cloud result:', result);
+                        logo = result.secure_url;
+                        resolve();
+                    }
+                }).end(req.file.buffer);
+            });
+        } else {
+            logo = 'defaultGroup.jpg'
+        }
+
+        const tokenRandom = crypto.randomBytes(5).toString('hex')
 
         const newData = {
+            visual_id: tokenRandom,
             title,
             uploader,
             description,
-            image: result.secure_url
+            link,
+            image: logo
         }
 
         const resultNewData = new visualModel(newData)
         await resultNewData.save()
 
-        return res.status(200).json({ status: 200, message: 'Berhasil tambah data visual!', data: existVisual })
+        return res.status(200).json({ status: 200, message: 'Berhasil tambah data visual!', data: newData })
 
     } catch (error) {
         return res.status(500).json({ status: 500, message: 'Server bermasalah!', error: error.message })
@@ -56,7 +86,7 @@ const createVisual = async (req, res) => {
 const removeVisual = async (req, res) => {
     try {
         
-        const { visual_id } = req.body
+        const { visual_id } = req.params
 
         const existVisual = await visualModel.findOneAndDelete({ visual_id })
         if(!existVisual) return res.json({ status: 404, message: 'Data visual tidak ditemukan!' })
@@ -71,54 +101,51 @@ const removeVisual = async (req, res) => {
 const updateVisual = async (req, res) => {
     try {
 
-        const { visual_id, title, description } = req.body
+        const { visual_id, title, description, uploader, link } = req.body
 
         const existVisual = await visualModel.findOne({ visual_id })
         if(!existVisual) return res.json({ status: 404, message: 'Data visual tidak ditemukan!' })
+        
+        const updateFields = { title, description, uploader, link };
             
-        const filter = { visual_id }
-        let nameImage = null
-        let imageVisual = null
-
-        if(req.file) {
-
-            const originameName = req.file.filename
-            const tokenRandon = crypto.randomBytes(5).toString('hex')
-            nameImage = `${tokenRandon}_${originameName}`
+        if (req.file) {
+            const originalName = req.file.originalname;
+            const randomChars = crypto.randomBytes(4).toString('hex');
+            logo = `${randomChars}_${originalName}`;
 
             try {
                 await cloudinary.uploader.destroy(existVisual.image);
                 await new Promise((resolve, reject) => {
-                    cloudinary.uploader.upload_stream({ public_id: nameImage }, (error, result) => {
+                    cloudinary.uploader.upload_stream({ public_id: logo }, (error, result) => {
                         if (error) {
-                            console.error('Pengiriman gambar ke cloudinary gagal:', error);
+                            console.error('Cloudinary upload error:', error);
                             reject(error);
                         } else {
-                            console.log('Hsil:', result);
-                            imageVisual = result.secure_url;
+                            console.log('cloud result:', result);
+                            updateFields.image = result.secure_url;
                             resolve();
                         }
                     }).end(req.file.buffer);
                 });
             } catch (cloudinaryError) {
-                console.error('Pengiriman gambar ke cloudinary gagal!:', cloudinaryError);
-                return res.json({ status: 500, message: 'Proses perbarui cloudinary gagal!' });
+                console.error('Cloudinary upload error:', cloudinaryError);
+                return res.json({ status: 500, message: 'Failed to update Group due to Cloudinary error!' });
             }
-
-        } else {
-            imageVisual = 'default.jpg'
-        }
-        
-        const set = {
-            title,
-            description
         }
 
-        const updateUser = await visualModel.updateOne(filter, set, { new: true })
-        if(!updateUser) return res.json({ status: 500, message: 'Gagal perbarui data visual!', data: visual_id })
+        const updateGroup = await visualModel.findOneAndUpdate(
+            { visual_id },
+            { $set: updateFields },
+            { new: true }
+        );
+
+        if (!updateGroup) {
+            return res.json({ status: 500, message: 'Gagal perbarui data!' });
+        }
+
         const resultNew = await visualModel.findOne({ visual_id })
-        
-        return res.json({ status: 200, message: 'Berhasil perbarui data visual!', data: resultNew })
+
+        return res.json({ status: 200, message: 'Berhasil perbarui data!', data: resultNew });
         
     } catch (error) {
         return res.json({ status: 200, message: 'Server bermasalah!', message: error.message })

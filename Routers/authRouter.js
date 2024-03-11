@@ -8,4 +8,4 @@ router.post('/signup', authController.signup)
 router.post('/delete/:user_id', authController.removeUser)
 router.post('/update', authController.updateUser)
 
-module.exports = router
+module.exports = router 

@@ -40,6 +40,7 @@ const VisualRouter = require('./Routers/visualRouter')
 
 app.use('/account', accountRouter)
 app.use('/visual', VerifyToken, VisualRouter)
+app.use('/v2/visual', VisualRouter)
 
 app.get('/test', (req, res) => {
     res.send('test success!')   
