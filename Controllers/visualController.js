@@ -23,10 +23,7 @@ const getAllVisual = async (req, res) => {
 
 const createVisual = async (req, res) => {
     try {
-        const { title, description, uploader, link } = req.body
-
-        console.log(req.body)
-        console.log(req.file)
+        const { title, description, uploader, link, type_dinas } = req.body
 
         const existVisual = await visualModel.findOne({ title })
         if (existVisual) {
@@ -67,6 +64,7 @@ const createVisual = async (req, res) => {
         const newData = {
             visual_id: tokenRandom,
             title,
+            type_dinas,
             uploader,
             description,
             link,
@@ -101,12 +99,12 @@ const removeVisual = async (req, res) => {
 const updateVisual = async (req, res) => {
     try {
 
-        const { visual_id, title, description, uploader, link } = req.body
+        const { visual_id, title, description, uploader, link, type_dinas } = req.body
 
         const existVisual = await visualModel.findOne({ visual_id })
         if(!existVisual) return res.json({ status: 404, message: 'Data visual tidak ditemukan!' })
         
-        const updateFields = { title, description, uploader, link };
+        const updateFields = { title, description, uploader, link, type_dinas };
             
         if (req.file) {
             const originalName = req.file.originalname;

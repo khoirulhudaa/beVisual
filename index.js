@@ -37,9 +37,12 @@ const VerifyToken = require('./Middlewares/verifyToken')
 // Routers
 const accountRouter = require('./Routers/authRouter')
 const VisualRouter = require('./Routers/visualRouter')
+const DinasRouter = require('./Routers/dinasRouter')
 
 app.use('/account', accountRouter)
 app.use('/visual', VerifyToken, VisualRouter)
+app.use('/dinas', VerifyToken, DinasRouter)
+app.use('/v2/dinas', DinasRouter)
 app.use('/v2/visual', VisualRouter)
 
 app.get('/test', (req, res) => {

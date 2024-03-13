@@ -13,6 +13,10 @@ const VisualModel = new mongoose.Schema({
         type: String,
         required: true
     },
+    type_dinas: {
+        type: String,
+        required: true
+    },
     uploader: {
         type: String,
         required: true
